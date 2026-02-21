@@ -6,11 +6,16 @@ import {
   deleteCategory,
 } from "../controllers/categoryController.js";
 
+import { upload } from "../middleware/upload.js";
+
 const router = express.Router();
 
 router.get("/", getCategories);
 router.get("/:id", getCategoryById);
-router.post("/", createCategory);
+
+// 🔥 ADD THIS
+router.post("/", upload.single("image"), createCategory);
+
 router.delete("/:id", deleteCategory);
 
 export default router;

@@ -1,10 +1,21 @@
 import Product from "../models/Product.js";
+import supabase from "../config/supabase.js";
 
 /* ================= GET ALL ================= */
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().populate("category");
     res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= GET SINGLE ================= */
+export const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate("category");
+    res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -15,7 +26,8 @@ export const getProductsByCategory = async (req, res) => {
   try {
     const products = await Product.find({
       category: req.params.categoryId,
-    });
+    }).populate("category");
+
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -25,51 +37,82 @@ export const getProductsByCategory = async (req, res) => {
 /* ================= CREATE ================= */
 export const createProduct = async (req, res) => {
   try {
-    console.log("REQ BODY:", req.body); // 🔥 DEBUG
+    const {
+      name,
+      price,
+      category,
+      description,
+      ingredients,
+      usage,
+      bestSeller,
+    } = req.body;
 
-    const { name, price, category, image, bestSeller } = req.body;
+    let imageUrl = "";
 
-    if (!name || !price || !category) {
-      return res.status(400).json({
-        message: "Name, price and category required",
-      });
+    if (req.file) {
+      const fileName = `public/${Date.now()}-${req.file.originalname}`;
+
+      const { error } = await supabase.storage
+        .from("products")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+        });
+
+      if (error) {
+        return res.status(500).json({ message: error.message });
+      }
+
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(fileName);
+
+      imageUrl = data.publicUrl;
     }
 
     const product = await Product.create({
       name,
       price: Number(price),
       category,
-      image,
-      bestSeller: bestSeller || false,
+      description,
+      ingredients,
+      usage,
+      image: imageUrl,
+      bestSeller: bestSeller === "true" || bestSeller === true,
     });
 
     res.status(201).json(product);
   } catch (err) {
-    console.log("CREATE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= REVIEW ================= */
+export const addReview = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    const { name, rating, comment } = req.body;
+
+    product.reviews.push({
+      name,
+      rating: Number(rating),
+      comment,
+    });
+
+    product.averageRating =
+      product.reviews.reduce((acc, item) => acc + item.rating, 0) /
+      product.reviews.length;
+
+    await product.save();
+
+    res.json(product);
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 /* ================= DELETE ================= */
 export const deleteProduct = async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-/* ================= UPDATE ================= */
-export const updateProduct = async (req, res) => {
-  try {
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  await Product.findByIdAndDelete(req.params.id);
+  res.json({ message: "Deleted" });
 };

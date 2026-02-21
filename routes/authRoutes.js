@@ -1,17 +1,29 @@
-// TEMP – RUN ONLY ONCE
-router.post("/register-admin", async (req, res) => {
-  const { email, password } = req.body;
+import express from "express";
+import {
+  registerUser,
+  loginUser,
+  googleLogin,
+  getProfile,
+} from "../controllers/authController.js";
 
-  const exists = await User.findOne({ email });
-  if (exists) {
-    return res.status(400).json({ msg: "Admin already exists" });
-  }
+import { protect } from "../middleware/authMiddleware.js";
 
-  const admin = await User.create({
-    email,
-    password,
-    role: "admin",
-  });
+const router = express.Router();
 
-  res.json({ msg: "Admin created", admin });
-});
+// =============================
+// Auth Routes
+// =============================
+
+// Register
+router.post("/register", registerUser);
+
+// Login
+router.post("/login", loginUser);
+
+// Google Login
+router.post("/google", googleLogin);
+
+// Get Logged-in User Profile
+router.get("/profile", protect, getProfile);
+
+export default router;

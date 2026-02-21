@@ -6,22 +6,20 @@ import {
   updateBanner,
 } from "../controllers/bannerController.js";
 
-import {
-  uploadBanner,
-  resizeBanner,
-} from "../middleware/uploadMiddleware.js";
+import { upload } from "../middleware/upload.js"; // 🔥 use multer memoryStorage
 
 const router = express.Router();
 
+/* GET */
 router.get("/", getBanners);
 
-// ✅ upload
-router.post("/", uploadBanner, resizeBanner, addBanner);
+/* UPLOAD */
+router.post("/", upload.single("image"), addBanner);
 
-// ✅ edit
-router.put("/:id", uploadBanner, resizeBanner, updateBanner);
+/* UPDATE */
+router.put("/:id", upload.single("image"), updateBanner);
 
-// ✅ delete
+/* DELETE */
 router.delete("/:id", deleteBanner);
 
 export default router;
