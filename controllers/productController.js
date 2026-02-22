@@ -15,6 +15,11 @@ export const getProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate("category");
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -44,11 +49,14 @@ export const createProduct = async (req, res) => {
       description,
       ingredients,
       usage,
+      weight,          // ✅ NEW
+      dimensions,      // ✅ NEW
       bestSeller,
     } = req.body;
 
     let imageUrl = "";
 
+    /* ===== IMAGE UPLOAD ===== */
     if (req.file) {
       const fileName = `public/${Date.now()}-${req.file.originalname}`;
 
@@ -76,6 +84,8 @@ export const createProduct = async (req, res) => {
       description,
       ingredients,
       usage,
+      weight,            // ✅ SAVE
+      dimensions,        // ✅ SAVE
       image: imageUrl,
       bestSeller: bestSeller === "true" || bestSeller === true,
     });
@@ -86,10 +96,79 @@ export const createProduct = async (req, res) => {
   }
 };
 
+/* ================= UPDATE ================= */
+export const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const {
+      name,
+      price,
+      category,
+      description,
+      ingredients,
+      usage,
+      weight,          // ✅ NEW
+      dimensions,      // ✅ NEW
+      bestSeller,
+    } = req.body;
+
+    /* ===== FIELD UPDATE ===== */
+    product.name = name || product.name;
+    product.price = price ? Number(price) : product.price;
+    product.category = category || product.category;
+    product.description = description || product.description;
+    product.ingredients = ingredients || product.ingredients;
+    product.usage = usage || product.usage;
+    product.weight = weight || product.weight;              // ✅ UPDATE
+    product.dimensions = dimensions || product.dimensions;  // ✅ UPDATE
+
+    if (bestSeller !== undefined) {
+      product.bestSeller =
+        bestSeller === "true" || bestSeller === true;
+    }
+
+    /* ===== IMAGE UPDATE ===== */
+    if (req.file) {
+      const fileName = `public/${Date.now()}-${req.file.originalname}`;
+
+      const { error } = await supabase.storage
+        .from("products")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+        });
+
+      if (error) {
+        return res.status(500).json({ message: error.message });
+      }
+
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(fileName);
+
+      product.image = data.publicUrl;
+    }
+
+    const updatedProduct = await product.save();
+
+    res.json(updatedProduct);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 /* ================= REVIEW ================= */
 export const addReview = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     const { name, rating, comment } = req.body;
 
@@ -113,6 +192,10 @@ export const addReview = async (req, res) => {
 
 /* ================= DELETE ================= */
 export const deleteProduct = async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

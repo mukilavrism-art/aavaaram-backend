@@ -1,19 +1,27 @@
 import Category from "../models/Category.js";
 import supabase from "../config/supabase.js";
 
-/* GET ALL */
+/* ================= GET ALL ================= */
 export const getCategories = async (req, res) => {
-  const categories = await Category.find();
-  res.json(categories);
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-/* GET BY ID */
+/* ================= GET BY ID ================= */
 export const getCategoryById = async (req, res) => {
-  const category = await Category.findById(req.params.id);
-  res.json(category);
+  try {
+    const category = await Category.findById(req.params.id);
+    res.json(category);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-/* CREATE */
+/* ================= CREATE ================= */
 export const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
@@ -28,13 +36,12 @@ export const createCategory = async (req, res) => {
       const fileName = `categories/${Date.now()}-${req.file.originalname}`;
 
       const { error } = await supabase.storage
-        .from("products") // same bucket
+        .from("products")
         .upload(fileName, req.file.buffer, {
           contentType: req.file.mimetype,
         });
 
       if (error) {
-        console.log("UPLOAD ERROR:", error);
         return res.status(500).json({ message: error.message });
       }
 
@@ -50,15 +57,57 @@ export const createCategory = async (req, res) => {
       image: imageUrl,
     });
 
-    res.json(category);
+    res.status(201).json(category);
   } catch (err) {
-    console.log("CREATE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
-/* DELETE */
+/* ================= UPDATE ================= */
+export const updateCategory = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const { name } = req.body;
+    category.name = name || category.name;
+
+    if (req.file) {
+      const fileName = `categories/${Date.now()}-${req.file.originalname}`;
+
+      const { error } = await supabase.storage
+        .from("products")
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+        });
+
+      if (error) {
+        return res.status(500).json({ message: error.message });
+      }
+
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(fileName);
+
+      category.image = data.publicUrl;
+    }
+
+    await category.save();
+    res.json(category);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= DELETE ================= */
 export const deleteCategory = async (req, res) => {
-  await Category.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  try {
+    await Category.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

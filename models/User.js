@@ -1,47 +1,18 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const addressSchema = new mongoose.Schema(
-  {
-    label: {
-      type: String,
-      enum: ["Home", "Work", "Personal"],
-      required: true,
-    },
-    fullAddress: { type: String, required: true },
-
-    house: String,
-    street: String,
-    area: String,
-    city: String,
-    state: String,
-    country: String,
-    pincode: String,
-
-    location: {
-      lat: Number,
-      lng: Number,
-    },
-
-    isDefault: { type: Boolean, default: false },
-  },
-  { _id: true }
-);
-
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    phone: String,
 
-    addresses: [addressSchema],
-
-    avatar: {
+    email: {
       type: String,
-      default:
-        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      required: true,
+      unique: true,
+      lowercase: true,
     },
+
+    password: { type: String, required: true },
 
     role: {
       type: String,
@@ -52,18 +23,16 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* =============================
-   HASH PASSWORD BEFORE SAVE
-============================= */
+// 🔐 Hash password before save
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-/* =============================
-   COMPARE PASSWORD (🔥 MISSING PART)
-============================= */
+// 🔑 Compare password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

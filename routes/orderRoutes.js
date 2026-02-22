@@ -1,23 +1,21 @@
 import express from "express";
-import {
-  createOrder,
-  getOrders,
-  exportOrders,
-  getMyOrders,
-} from "../controllers/orderController.js";
-
-import { protect } from "../middleware/authMiddleware.js";
+import Order from "../models/Order.js";
 
 const router = express.Router();
 
-/* CREATE ORDER */
-router.post("/", createOrder);
+/* GET ALL */
+router.get("/", async (req, res) => {
+  const orders = await Order.find().sort({ createdAt: -1 });
+  res.json(orders);
+});
 
-/* ADMIN ROUTES */
-router.get("/", getOrders);
-router.get("/export", exportOrders);
+/* GET USER ORDERS */
+router.get("/user/:email", async (req, res) => {
+  const orders = await Order.find({
+    "customer.email": req.params.email,
+  }).sort({ createdAt: -1 });
 
-/* USER ROUTE */
-router.get("/my-orders", protect, getMyOrders);
+  res.json(orders);
+});
 
 export default router;

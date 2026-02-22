@@ -2,34 +2,32 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    orderId: String,
-
-    customer: {
-      firstName: String,
-      lastName: String,
-      email: String,
-      phone: String,
-      address: String,
-      city: String,
-      state: String,
-      pincode: String,
-    },
-
-    products: [
+    items: [
       {
         productId: String,
         name: String,
         price: Number,
-        qty: Number,
-      }
+        quantity: Number,
+        image: String,
+      },
     ],
 
     totalAmount: Number,
     paymentMethod: String,
-    paymentStatus: String,
-    orderStatus: String,
+    paymentStatus: { type: String, default: "Pending" },
+
+    customer: {
+      email: String,
+      firstName: String,
+      lastName: String,
+      address: String,
+      city: String,
+      state: String,
+      pincode: String,
+      phone: String,
+    },
   },
-  { timestamps: true }   // 🔥 THIS ADDS createdAt automatically
+  { timestamps: true }
 );
 
 export default mongoose.model("Order", orderSchema);

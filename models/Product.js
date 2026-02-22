@@ -19,6 +19,17 @@ const productSchema = new mongoose.Schema(
     ingredients: String,
     usage: String,
 
+    // ✅ ADD THESE TWO FIELDS
+    weight: {
+      type: String,
+      default: "",
+    },
+
+    dimensions: {
+      type: String,
+      default: "",
+    },
+
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
