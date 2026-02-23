@@ -18,7 +18,17 @@ import contactRoutes from "./routes/contactRoutes.js";
 
 const app = express();
 
-app.use(cors());
+
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",   // local frontend
+      "https://aavaaram-demo.netlify.app" // deployed frontend
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
