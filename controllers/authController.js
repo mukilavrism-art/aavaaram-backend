@@ -7,14 +7,10 @@ const generateToken = (id) => {
   });
 };
 
-/* ================= REGISTER ================= */
+// REGISTER
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields required" });
-    }
 
     const userExists = await User.findOne({ email });
 
@@ -22,28 +18,22 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const role =
-      email === process.env.ADMIN_EMAIL ? "admin" : "user";
-
     const user = await User.create({
       name,
       email,
       password,
-      role,
     });
 
     res.status(201).json({
       message: "Registered successfully",
       token: generateToken(user._id),
-      role: user.role,
     });
   } catch (err) {
-    console.error("Register Error:", err);
     res.status(500).json({ error: "Registration failed" });
   }
 };
 
-/* ================= LOGIN ================= */
+// LOGIN
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,22 +41,20 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     res.status(200).json({
       message: "Login successful",
       token: generateToken(user._id),
-      role: user.role,
     });
   } catch (err) {
-    console.error("Login Error:", err);
     res.status(500).json({ error: "Login failed" });
   }
 };
