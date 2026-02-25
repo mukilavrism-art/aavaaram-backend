@@ -46,9 +46,12 @@ export const createProduct = async (req, res) => {
       name,
       price,
       category,
+      shortDescription,
       description,
       ingredients,
       usage,
+      disclaimer,   // ✅ NEW
+  // otherNames,
       weight,          // ✅ NEW
       dimensions,      // ✅ NEW
       bestSeller,
@@ -81,9 +84,12 @@ export const createProduct = async (req, res) => {
       name,
       price: Number(price),
       category,
+      shortDescription,
       description,
       ingredients,
       usage,
+      disclaimer,   // ✅ NEW
+  // otherNames,
       weight,            // ✅ SAVE
       dimensions,        // ✅ SAVE
       image: imageUrl,
@@ -109,9 +115,12 @@ export const updateProduct = async (req, res) => {
       name,
       price,
       category,
+      shortDescription,
       description,
       ingredients,
       usage,
+      disclaimer,   // ✅ NEW
+  // otherNames,
       weight,          // ✅ NEW
       dimensions,      // ✅ NEW
       bestSeller,
@@ -121,9 +130,12 @@ export const updateProduct = async (req, res) => {
     product.name = name || product.name;
     product.price = price ? Number(price) : product.price;
     product.category = category || product.category;
+    product.shortDescription = shortDescription ?? product.shortDescription;
     product.description = description || product.description;
     product.ingredients = ingredients || product.ingredients;
     product.usage = usage || product.usage;
+    product.disclaimer = disclaimer || product.disclaimer;
+// product.otherNames = otherNames || product.otherNames;
     product.weight = weight || product.weight;              // ✅ UPDATE
     product.dimensions = dimensions || product.dimensions;  // ✅ UPDATE
 

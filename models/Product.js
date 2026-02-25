@@ -15,11 +15,38 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     image: String,
 
-    description: String,
-    ingredients: String,
-    usage: String,
+    /* ===== TEXT CONTENT ===== */
+    shortDescription: {
+      type: String,
+      default: "",
+    },
 
-    // ✅ ADD THESE TWO FIELDS
+    description: {
+      type: String,
+      default: "",
+    },
+
+    ingredients: {
+      type: String,
+      default: "",
+    },
+
+    usage: {
+      type: String,
+      default: "",
+    },
+
+    disclaimer: {
+      type: String,
+      default: "",
+    },
+
+    // otherNames: {
+    //   type: String,
+    //   default: "",
+    // },
+
+    /* ===== ADDITIONAL INFO ===== */
     weight: {
       type: String,
       default: "",
@@ -30,16 +57,24 @@ const productSchema = new mongoose.Schema(
       default: "",
     },
 
+    /* ===== CATEGORY ===== */
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
     },
 
-    bestSeller: { type: Boolean, default: false },
+    bestSeller: {
+      type: Boolean,
+      default: false,
+    },
 
+    /* ===== REVIEWS ===== */
     reviews: [reviewSchema],
-    averageRating: { type: Number, default: 0 },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
