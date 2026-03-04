@@ -15,6 +15,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 // import userRoutes from "./routes/userRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
 
 const app = express();
 
@@ -45,7 +47,8 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payment", paymentRoutes); 
 
 app.use("/api/contact", contactRoutes);
-
+app.use("/api/cart", cartRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {

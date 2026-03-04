@@ -15,6 +15,8 @@ const orderSchema = new mongoose.Schema(
     totalAmount: Number,
     paymentMethod: String,
     paymentStatus: { type: String, default: "Pending" },
+cancelReason: { type: String },
+cancelledAt: { type: Date },
 
     customer: {
       email: String,

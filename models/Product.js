@@ -68,6 +68,11 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    healthType: {
+  type: String,
+  enum: ["bestseller", "combo", "health"],
+  default: "health",
+},
 
     /* ===== REVIEWS ===== */
     reviews: [reviewSchema],

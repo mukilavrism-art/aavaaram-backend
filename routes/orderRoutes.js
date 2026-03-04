@@ -17,5 +17,31 @@ router.get("/user/:email", async (req, res) => {
 
   res.json(orders);
 });
+// CANCEL ORDER
+router.put("/cancel/:id", async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        paymentStatus: "Cancelled",
+        cancelReason: reason,
+        cancelledAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(order);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Cancel failed" });
+  }
+});
 
 export default router;

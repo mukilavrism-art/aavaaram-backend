@@ -50,11 +50,11 @@ export const createProduct = async (req, res) => {
       description,
       ingredients,
       usage,
-      disclaimer,   // ✅ NEW
-  // otherNames,
-      weight,          // ✅ NEW
-      dimensions,      // ✅ NEW
+      disclaimer,
+      weight,
+      dimensions,
       bestSeller,
+      healthType,   // ✅ NEW FIELD
     } = req.body;
 
     let imageUrl = "";
@@ -88,15 +88,16 @@ export const createProduct = async (req, res) => {
       description,
       ingredients,
       usage,
-      disclaimer,   // ✅ NEW
-  // otherNames,
-      weight,            // ✅ SAVE
-      dimensions,        // ✅ SAVE
+      disclaimer,
+      weight,
+      dimensions,
       image: imageUrl,
       bestSeller: bestSeller === "true" || bestSeller === true,
+      healthType: healthType || "health",  // ✅ DEFAULT SAFE
     });
 
     res.status(201).json(product);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -119,11 +120,11 @@ export const updateProduct = async (req, res) => {
       description,
       ingredients,
       usage,
-      disclaimer,   // ✅ NEW
-  // otherNames,
-      weight,          // ✅ NEW
-      dimensions,      // ✅ NEW
+      disclaimer,
+      weight,
+      dimensions,
       bestSeller,
+      healthType,   // ✅ ADD THIS
     } = req.body;
 
     /* ===== FIELD UPDATE ===== */
@@ -135,13 +136,16 @@ export const updateProduct = async (req, res) => {
     product.ingredients = ingredients || product.ingredients;
     product.usage = usage || product.usage;
     product.disclaimer = disclaimer || product.disclaimer;
-// product.otherNames = otherNames || product.otherNames;
-    product.weight = weight || product.weight;              // ✅ UPDATE
-    product.dimensions = dimensions || product.dimensions;  // ✅ UPDATE
+    product.weight = weight || product.weight;
+    product.dimensions = dimensions || product.dimensions;
 
     if (bestSeller !== undefined) {
       product.bestSeller =
         bestSeller === "true" || bestSeller === true;
+    }
+
+    if (healthType) {
+      product.healthType = healthType;   // ✅ IMPORTANT FIX
     }
 
     /* ===== IMAGE UPDATE ===== */
@@ -168,6 +172,7 @@ export const updateProduct = async (req, res) => {
     const updatedProduct = await product.save();
 
     res.json(updatedProduct);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -197,6 +202,7 @@ export const addReview = async (req, res) => {
     await product.save();
 
     res.json(product);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
